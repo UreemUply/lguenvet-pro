@@ -116,15 +116,15 @@
     const SUPABASE_URL = 'https://qcrafqzgfzuclxnbscod.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmFmcXpnZnp1Y2x4bmJzY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjI0MDMsImV4cCI6MjA4OTY5ODQwM30.CumnYJV3ikO4t79VsSt3Y0Y0qAvMb3RMXJHHUgayGjo';
     
-    let supabase;
+    let supabaseClient;
     let totalSteps = 0; 
     let totalQuestions = 0; 
     let formConfig = null;
 
     window.onload = async function() {
         try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            const { data, error } = await supabase.from('form_config').select('config_data').eq('id', 1).single();
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            const { data, error } = await supabaseClient.from('form_config').select('config_data').eq('id', 1).single();
             
             if (error) {
                 showError("관리자 페이지에서 먼저<br>[전체 저장하여 배포하기] 버튼을 눌러주세요.");
@@ -279,7 +279,7 @@
         submitBtn.innerText = "제출 중..."; submitBtn.disabled = true;
 
         try {
-            const { error } = await supabase.from('submissions').insert([{ content: collectedAnswers.join(' / ') }]);
+            const { error } = await supabaseClient.from('submissions').insert([{ content: collectedAnswers.join(' / ') }]);
             if (error) throw error;
             movePage(consentStep + 1);
         } catch (error) {
@@ -326,7 +326,7 @@
         const container = document.getElementById('planner-db-list');
         container.innerHTML = '<div style="text-align:center; padding:50px 0; color:#999; font-size:14px;">데이터를 실시간으로 불러오는 중...</div>';
         try {
-            const { data, error } = await supabase.from('submissions').select('*').order('id', { ascending: false });
+            const { data, error } = await supabaseClient.from('submissions').select('*').order('id', { ascending: false });
             if (error) throw error;
 
             container.innerHTML = '';
