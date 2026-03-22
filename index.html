@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>두드림 x U+ 임직원 특별 혜택</title>
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        :root {
+            --primary: #E6007E; --primary-hover: #C6006D; --primary-light: #FCE6F2; 
+            --bg-gray: #f4f5f7; --card-bg: #ffffff; --border-color: #e5e7eb;
+            --text-main: #1f2937; --text-sub: #6b7280; --error-color: #ef4444;
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+        * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0;}
+        body { background-color: var(--bg-gray); height: 100vh; height: 100dvh; overflow: hidden; color: var(--text-main); display: flex; justify-content: center; }
+        #app { width: 100%; max-width: 480px; background-color: var(--card-bg); height: 100%; position: relative; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.02); }
+        .header { height: 70px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; background-color: white; z-index: 100; position: sticky; top: 0; border-bottom: 1px solid var(--border-color); flex-shrink: 0;}
+        .header-logo-container { display: flex; align-items: center; width: 60%; height: 100%; padding-right: 10px; overflow: hidden;}
+        .u-logo-img { max-height: 45px; max-width: 100%; object-fit: contain; object-position: left center; }
+        .header-right-text { width: 40%; color: #bbb; font-size: 13px; font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .progress-wrapper { padding: 12px 20px; background-color: white; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; flex-shrink: 0;}
+        .progress-text { font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap; width: 45px; text-align: right;}
+        .progress-container { flex-grow: 1; height: 6px; background-color: #e5e7eb; border-radius: 10px; overflow: hidden; }
+        .progress-bar { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.3s ease-out; }
+        .content-container { flex-grow: 1; position: relative; overflow-y: auto; padding-bottom: 160px; }
+        .page { display: none; flex-direction: column; padding: 24px 24px 0 24px; height: 100%; width: 100%; position: absolute; top: 0; left: 0; }
+        .page.active { display: flex; animation: slideUp 0.4s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        h1.user-h1 { font-size: 24px; font-weight: 700; color: #111; line-height: 1.4; margin: 0 0 6px 0; word-break: keep-all; }
+        .user-sub { font-size: 15px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; word-break: keep-all; }
+        .cover-image-box { width: 100%; height: 35vh; max-height: 280px; background-color: #fafafa; border-radius: 20px; margin: 0 auto 16px auto; border: 1px solid var(--border-color); box-shadow: var(--shadow); overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 60px; flex-shrink: 0; }
+        .cover-image-box img { width: 100%; height: 100%; object-fit: cover; }
+        .question-image-box { width: 100%; height: 160px; background-color: #fafafa; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 50px; flex-shrink: 0; }
+        .question-image-box img { width: 100%; height: 100%; object-fit: cover; }
+        input.user-input { width: 100%; padding: 18px; margin-bottom: 8px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 16px; font-weight: 500; transition: all 0.2s; background-color: #fafafa;}
+        input.user-input:focus { border: 2px solid var(--primary); background-color: white;}
+        .error-msg { color: var(--error-color); font-size: 13px; font-weight: 600; margin-bottom: 16px; display: none; text-align: center; }
+        .box-btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+        .box-btn-label { display: block; position: relative; cursor: pointer; }
+        .box-btn-label input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .box-btn-content { display: flex; align-items: center; justify-content: center; width: 100%; padding: 18px; border: 2px solid var(--border-color); border-radius: 12px; background-color: var(--card-bg); font-weight: 600; font-size: 16px; color: var(--text-main); transition: all 0.2s; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .box-btn-label:hover .box-btn-content { border-color: #f7bbdc; background-color: #fff9fc; }
+        .box-btn-label input:checked ~ .box-btn-content { border-color: var(--primary); background-color: var(--primary-light); color: var(--primary); box-shadow: 0 4px 10px rgba(230, 0, 126, 0.1); }
+        .consent-sector { margin-bottom: 25px; }
+        .consent-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
+        .consent-box { background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:12px; font-size:13px; color:#475569; height:130px; overflow-y:auto; white-space:pre-wrap; line-height:1.6; }
+        .consent-check-label { display:flex; align-items:center; gap:12px; padding:15px; background:white; border:2px solid var(--border-color); border-radius:12px; cursor:pointer; margin-top:10px;}
+        .consent-check-input { width:22px; height:22px; accent-color:var(--primary); }
+        .consent-check-text { font-size:15px; font-weight:700; color:var(--text-main); }
+        .footer { padding: 16px 20px 24px 20px; background-color: white; border-top: 1px solid var(--border-color); position: absolute; bottom: 0; left: 0; width: 100%; z-index: 90; display: none; }
+        .footer-flex { display: flex; gap: 10px; width: 100%; }
+        .btn-primary { flex: 1; padding: 16px; background-color: var(--primary); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(230, 0, 126, 0.15); }
+        .btn-secondary { width: 30%; padding: 16px; background-color: #f3f4f6; color: var(--text-main); border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .spacer { flex-grow: 1; }
+        .center-text { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;}
+        .planner-link-btn { background: none; border: none; font-size: 13px; color: #9ca3af; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; margin-top: 16px; width: 100%; justify-content: center;}
+        .planner-link-btn:hover { color: var(--text-main); }
+        #planner-login { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
+        .login-box { background: white; width: 100%; max-width: 320px; padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .login-input { width: 100%; padding: 14px; margin-top: 16px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; text-align: center; font-weight: 700; letter-spacing: 2px;}
+        .login-input:focus { border-color: var(--primary); }
+        #planner-view { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: #f8fafc; z-index: 1000; flex-direction: column; }
+        .planner-header { height: 60px; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-weight: 700; font-size: 16px; flex-shrink: 0;}
+        .planner-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
+        .db-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
+        .db-card-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-sub); border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;}
+        .db-card-content { font-size: 15px; color: var(--text-main); font-weight: 600; line-height: 1.5; margin-bottom: 10px;}
+        .db-remark { font-size: 13px; color: var(--primary); background: var(--primary-light); padding: 8px 12px; border-radius: 6px; }
+        #loading-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:white; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--text-sub); font-size: 14px;}
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;}
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body> 
+
+<div id="app">
+    <div id="loading-screen">
+        <div class="spinner"></div>
+        <div id="loading-text">행사 정보를 불러오는 중입니다...</div>
+    </div>
+
+    <div class="header">
+        <div class="header-logo-container" id="u-logo-container">
+            <img src="" class="u-logo-img" alt="로고" id="u-logo-img" style="display:none;">
+            <span id="u-logo-txt" style="color:#004D95; font-weight:800; font-size:18px;">두드림 <span style="color:#ccc;">x</span> <span style="color:#E6007E;">U+</span></span>
+        </div>
+        <div class="header-right-text" id="u-logo-sub-txt">임직원 특별 혜택</div>
+    </div>
+    
+    <div class="progress-wrapper">
+        <div class="progress-container"><div class="progress-bar" id="progressBar" style="width:0%;"></div></div>
+        <div class="progress-text" id="progressText">대기</div>
+    </div>
+
+    <div class="content-container" id="dynamic-form-container"></div>
+
+    <div id="planner-login">
+        <div class="login-box">
+            <h2 style="font-size: 20px; color: #111; margin-bottom: 5px;">플래너 전용 모드</h2>
+            <p style="font-size: 13px; color: var(--text-sub);">고객 접수 내역을 확인하려면<br>암호를 입력해 주세요.</p>
+            <input type="password" id="planner-pw" class="login-input" placeholder="암호 입력" onkeypress="if(event.keyCode==13) checkPlannerPw()">
+            <button class="btn-primary" style="width: 100%; padding: 14px; margin-top: 5px;" onclick="checkPlannerPw()">접속하기</button>
+            <button style="background:none; border:none; color:#999; font-size:13px; margin-top:15px; cursor:pointer;" onclick="closePlannerLogin()">닫기</button>
+        </div>
+    </div>
+
+    <div id="planner-view">
+        <div class="planner-header">
+            <span>📋 실시간 접수 현황</span>
+            <button style="background:none; border:none; color:white; font-weight:700; font-size:14px; cursor:pointer;" onclick="closePlannerView()">나가기 ✕</button>
+        </div>
+        <div class="planner-content" id="planner-db-list"></div>
+    </div>
+</div>
+
+<script>
+    // 👑 여기에 발급받은 Supabase URL과 KEY를 붙여넣으세요! 👑
+    const SUPABASE_URL = 'https://qcrafqzgfzuclxnbscod.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmFmcXpnZnp1Y2x4bmJzY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjI0MDMsImV4cCI6MjA4OTY5ODQwM30.CumnYJV3ikO4t79VsSt3Y0Y0qAvMb3RMXJHHUgayGjo';
+    
+    let supabase;
+    let totalSteps = 0; 
+    let totalQuestions = 0; 
+    let formConfig = null;
+
+    window.onload = async function() {
+        try {
+            if(SUPABASE_URL.startsWith('http')) {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await supabase.from('form_config').select('config_data').eq('id', 1).single();
+                if (error) throw error;
+                if (data && data.config_data && Object.keys(data.config_data).length > 0) {
+                    formConfig = data.config_data;
+                    renderFormFromConfig();
+                } else {
+                    document.getElementById('loading-text').innerHTML = '<span style="color:var(--error-color); font-weight:bold;">관리자 페이지에서 폼을 먼저 배포해 주세요.</span>';
+                    document.querySelector('.spinner').style.display = 'none';
+                }
+            } else {
+                document.getElementById('loading-text').innerHTML = '<span style="color:var(--error-color); font-weight:bold;">Supabase URL 설정이 필요합니다.</span>';
+                document.querySelector('.spinner').style.display = 'none';
+            }
+        } catch (error) {
+            document.getElementById('loading-text').innerHTML = '<span style="color:var(--error-color); font-weight:bold;">DB 연결 오류입니다. Supabase 키를 확인해 주세요.</span>';
+            document.querySelector('.spinner').style.display = 'none';
+        }
+    };
+
+    function renderFormFromConfig() {
+        document.getElementById('loading-screen').style.display = 'none'; 
+
+        if (formConfig.global.logo && formConfig.global.logo.length > 10) {
+            document.getElementById('u-logo-img').src = formConfig.global.logo;
+            document.getElementById('u-logo-img').style.display = 'block';
+            document.getElementById('u-logo-txt').style.display = 'none';
+        } else {
+            document.getElementById('u-logo-img').style.display = 'none';
+            document.getElementById('u-logo-txt').style.display = 'inline';
+        }
+        document.getElementById('u-logo-sub-txt').innerText = formConfig.global.text || '';
+
+        const container = document.getElementById('dynamic-form-container');
+        let htmlString = ''; 
+        let stepIndex = 0;
+
+        const coverImgTag = formConfig.cover.img ? `<img src="${formConfig.cover.img}">` : `🎁`;
+        htmlString += `
+            <div class="page active" id="page-0" style="padding-top: 20px;">
+                <div class="cover-image-box" style="${formConfig.cover.img ? '' : 'background:transparent; border:none; box-shadow:none; height:auto; min-height:150px;'}">${coverImgTag}</div>
+                <div class="center-text" style="margin-bottom: 20px;">
+                    <h1 class="user-h1" style="margin-bottom: 6px;">${formConfig.cover.title}</h1>
+                    <div class="user-sub" style="margin-bottom:0;">${formConfig.cover.sub}</div>
+                </div>
+                <div style="flex-grow:1;"></div>
+                <div class="footer" style="display:block;">
+                    <button class="btn-primary" onclick="goNext(0)" style="width:100%;">참여하기</button>
+                    <button class="planner-link-btn" onclick="openPlannerLogin()"><span>📋</span> 플래너 전용</button>
+                </div>
+            </div>`;
+        stepIndex++;
+
+        totalQuestions = formConfig.questions.length;
+        formConfig.questions.forEach((q, idx) => {
+            const imgHtml = q.img ? `<div class="question-image-box"><img src="${q.img}"></div>` : `<div class="question-image-box" style="background:transparent; border:none; height:80px;"><span style="font-size:40px;">Q${idx+1}.</span></div>`;
+            const subHtml = q.sub && q.sub !== '<br>' ? `<div class="user-sub">${q.sub}</div>` : '';
+            let inputHtml = '';
+            if (q.type === 'text') { 
+                inputHtml = `<input type="text" class="user-input val-check" placeholder="답변을 입력해 주세요.">`; 
+            } else {
+                inputHtml += `<div class="box-btn-group">`;
+                q.options.forEach((opt) => { 
+                    inputHtml += `<label class="box-btn-label"><input type="${q.type}" name="q${idx}" class="val-check" value="${opt}"><div class="box-btn-content">${opt}</div></label>`; 
+                });
+                inputHtml += `</div>`;
+            }
+            htmlString += `
+                <div class="page" id="page-${stepIndex}">
+                    ${imgHtml}
+                    <h1 class="user-h1" style="margin-top:0;">${q.title}</h1>
+                    ${subHtml}
+                    <div class="error-msg" id="err-${stepIndex}">항목을 입력/선택해 주세요.</div>
+                    ${inputHtml}
+                    <div class="spacer"></div>
+                    <div class="footer" style="display:block;">
+                        <div class="footer-flex">
+                            <button class="btn-secondary" onclick="goPrev(${stepIndex})">이전</button>
+                            <button class="btn-primary" onclick="goNext(${stepIndex})">다음</button>
+                        </div>
+                    </div>
+                </div>`;
+            stepIndex++;
+        });
+
+        const c = formConfig.consent;
+        htmlString += `
+            <div class="page" id="page-${stepIndex}" style="padding-top:10px;">
+                <h1 class="user-h1" style="font-size:22px; text-align:center; margin-bottom:20px;">약관 동의</h1>
+                <div class="consent-sector">
+                    <div class="consent-title">${c.pTitle}</div>
+                    <div class="consent-box">${c.pText}</div>
+                    <label class="consent-check-label"><input type="checkbox" class="consent-check-input val-check-required"><span class="consent-check-text">[필수] ${c.pLabel}</span></label>
+                </div>
+                <div class="consent-sector" style="margin-bottom:10px;">
+                    <div class="consent-title">${c.mTitle}</div>
+                    <div class="consent-box">${c.mText}</div>
+                    <label class="consent-check-label"><input type="checkbox" class="consent-check-input"><span class="consent-check-text">[선택] ${c.mLabel}</span></label>
+                </div>
+                <div class="error-msg" id="err-${stepIndex}" style="margin-bottom: 20px;">필수 약관에 동의하셔야 제출이 가능합니다.</div>
+                <div class="spacer"></div>
+                <div class="footer" style="display:block;"><div class="footer-flex"><button class="btn-secondary" onclick="goPrev(${stepIndex})">이전</button><button class="btn-primary" id="submit-btn" onclick="submitToSupabase(${stepIndex})">제출하기</button></div></div>
+            </div>`;
+        stepIndex++;
+
+        htmlString += `
+            <div class="page" id="page-${stepIndex}">
+                <div class="spacer"></div>
+                <div class="center-text"><div style="font-size: 80px; margin-bottom:20px;">🎉</div><div class="user-h1">${formConfig.finish.msg}</div><button class="btn-secondary" style="width: 100%; margin-top: 40px;" onclick="location.reload();">🏠 처음으로 돌아가기</button></div>
+                <div class="spacer"></div>
+            </div>`;
+        
+        container.innerHTML = htmlString;
+        totalSteps = stepIndex + 1; 
+        document.getElementById('progressText').innerText = '준비';
+    }
+
+    function goNext(currentStep) {
+        const page = document.getElementById('page-' + currentStep);
+        const errorMsg = page.querySelector('.error-msg');
+        if(errorMsg) errorMsg.style.display = 'none';
+
+        let isValid = true;
+        const textInputs = page.querySelectorAll('input[type="text"].val-check');
+        const radioInputs = page.querySelectorAll('input[type="radio"].val-check');
+        const checkInputs = page.querySelectorAll('input[type="checkbox"].val-check');
+
+        if (textInputs.length > 0) textInputs.forEach(t => { if (t.value.trim() === '') { t.style.borderColor = 'var(--error-color)'; isValid = false; } else { t.style.borderColor = 'var(--border-color)'; }});
+        if (radioInputs.length > 0) { if(!Array.from(radioInputs).some(r => r.checked)) isValid = false; }
+        if (checkInputs.length > 0) { if(!Array.from(checkInputs).some(c => c.checked)) isValid = false; }
+
+        if(!isValid && errorMsg) { errorMsg.style.display = 'block'; return; }
+        movePage(currentStep + 1);
+    }
+
+    async function submitToSupabase(consentStep) {
+        const page = document.getElementById('page-' + consentStep);
+        const errorMsg = page.querySelector('.error-msg');
+        if(errorMsg) errorMsg.style.display = 'none';
+
+        const requiredConsents = page.querySelectorAll('.consent-check-input.val-check-required');
+        if (requiredConsents.length > 0 && !Array.from(requiredConsents).some(c => c.checked)) {
+            errorMsg.style.display = 'block'; return;
+        }
+
+        let collectedAnswers = [];
+        document.querySelectorAll('.val-check').forEach(input => {
+            if(input.type === 'text') collectedAnswers.push(input.value);
+            else if ((input.type === 'radio' || input.type === 'checkbox') && input.checked) collectedAnswers.push(input.value);
+        });
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.innerText = "제출 중..."; submitBtn.disabled = true;
+
+        try {
+            const { error } = await supabase.from('submissions').insert([{ content: collectedAnswers.join(' / ') }]);
+            if (error) throw error;
+            movePage(consentStep + 1);
+        } catch (error) {
+            alert('데이터 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+            submitBtn.innerText = "제출하기"; submitBtn.disabled = false;
+        }
+    }
+
+    function goPrev(currentStep) { movePage(currentStep - 1); }
+
+    function movePage(targetStep) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        const targetPage = document.getElementById('page-' + targetStep);
+        if(targetPage) {
+            targetPage.classList.add('active');
+            document.querySelector('.content-container').scrollTop = 0; 
+            const pBar = document.getElementById('progressBar'); const pText = document.getElementById('progressText');
+            if(targetStep === 0) { pBar.style.width = '0%'; pText.innerText = '준비'; pText.style.color = 'var(--text-sub)'; } 
+            else if (targetStep === totalSteps - 1) { pBar.style.width = '100%'; pText.innerText = '완료!'; pText.style.color = 'var(--primary)'; } 
+            else if (targetStep === totalSteps - 2) { pBar.style.width = '100%'; pText.innerText = '약관동의'; pText.style.color = 'var(--primary)'; } 
+            else {
+                const currentQuestionNumber = targetStep; const progressPercentage = (currentQuestionNumber / totalQuestions) * 100;
+                pBar.style.width = progressPercentage + '%'; pText.innerText = `${currentQuestionNumber} / ${totalQuestions}`; pText.style.color = 'var(--primary)';
+            }
+        }
+    }
+
+    function openPlannerLogin() { document.getElementById('planner-login').style.display = 'flex'; document.getElementById('planner-pw').value = ''; document.getElementById('planner-pw').focus(); }
+    function closePlannerLogin() { document.getElementById('planner-login').style.display = 'none'; }
+    
+    function checkPlannerPw() {
+        const pw = document.getElementById('planner-pw').value;
+        if(pw === '2012') {
+            document.getElementById('planner-login').style.display = 'none';
+            document.getElementById('planner-view').style.display = 'flex';
+            fetchPlannerDB(); 
+        } else {
+            alert('암호가 올바르지 않습니다.'); document.getElementById('planner-pw').value = '';
+        }
+    }
+    function closePlannerView() { document.getElementById('planner-view').style.display = 'none'; }
+
+    async function fetchPlannerDB() {
+        const container = document.getElementById('planner-db-list');
+        container.innerHTML = '<div style="text-align:center; padding:50px 0; color:#999; font-size:14px;">데이터를 실시간으로 불러오는 중입니다...</div>';
+        try {
+            const { data, error } = await supabase.from('submissions').select('*').order('id', { ascending: false });
+            if (error) throw error;
+
+            container.innerHTML = '';
+            if(!data || data.length === 0) {
+                container.innerHTML = '<div style="text-align:center; padding:50px 0; color:#999; font-size:14px;">아직 접수된 내역이 없습니다.</div>';
+                return;
+            }
+            data.forEach(item => {
+                const d = new Date(item.created_at);
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                const remarkHtml = item.remark ? `<div class="db-remark">💡 비고: ${item.remark}</div>` : '';
+                const card = document.createElement('div');
+                card.className = 'db-card';
+                card.innerHTML = `<div class="db-card-header"><span style="font-weight:700; color:var(--primary);">No. ${item.id}</span><span>${dateStr}</span></div><div class="db-card-content">${item.content}</div>${remarkHtml}`;
+                container.appendChild(card);
+            });
+        } catch (error) {
+            container.innerHTML = '<div style="text-align:center; padding:50px 0; color:var(--error-color); font-size:14px;">데이터를 불러오는 데 실패했습니다.</div>';
+        }
+    }
+</script>
+</body>
+</html>
