@@ -202,7 +202,7 @@
         else if(tabId === 'global') document.getElementById('header-title').innerText = "글로벌 환경 설정";
         else if(tabId === 'db') { 
             document.getElementById('header-title').innerText = "신청자 DB 관리"; 
-            if(typeof fetchDBFromSupabase === 'function' && supabase) fetchDBFromSupabase(); 
+            if(typeof fetchDBFromSupabase === 'function' && supabaseClient) fetchDBFromSupabase(); 
         }
     }
 
@@ -210,14 +210,14 @@
     const SUPABASE_URL = 'https://qcrafqzgfzuclxnbscod.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmFmcXpnZnp1Y2x4bmJzY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjI0MDMsImV4cCI6MjA4OTY5ODQwM30.CumnYJV3ikO4t79VsSt3Y0Y0qAvMb3RMXJHHUgayGjo';
     
-    let supabaseClinent;
+    let supabaseClient;
     let qCount = 0; 
 
     window.onload = async function() {
         initDefaultQuestions(); // 화면 뼈대를 먼저 그립니다.
 
         try {
-            supabase = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             await loadConfigFromSupabase(); 
         } catch (error) {
             document.getElementById('db-status').innerText = "❌ 첫 접속입니다. 우측 하단의 [저장]을 눌러주세요.";
@@ -307,7 +307,7 @@
         tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; padding:30px;">데이터를 불러오는 중...</td></tr>';
         
         try {
-            const { data, error } = await supabase.from('submissions').select('*').order('id', { ascending: false });
+            const { data, error } = await supabaseClient.from('submissions').select('*').order('id', { ascending: false });
             if (error) throw error;
             
             tbody.innerHTML = '';
@@ -336,7 +336,7 @@
 
     async function updateRemarkToSupabase(id, value) {
         try {
-            const { error } = await supabase.from('submissions').update({ remark: value }).eq('id', id);
+            const { error } = await supabaseClient.from('submissions').update({ remark: value }).eq('id', id);
             if (error) throw error;
         } catch (error) {
             alert('메모 저장에 실패했습니다.');
@@ -346,7 +346,7 @@
     async function deleteDBRowFromSupabase(id) {
         if(confirm("이 접수 내역을 정말 영구 삭제하시겠습니까?")) {
             try {
-                const { error } = await supabase.from('submissions').delete().eq('id', id);
+                const { error } = await supabaseClient.from('submissions').delete().eq('id', id);
                 if (error) throw error;
                 fetchDBFromSupabase();
             } catch (error) {
