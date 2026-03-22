@@ -210,14 +210,14 @@
     const SUPABASE_URL = 'https://qcrafqzgfzuclxnbscod.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmFmcXpnZnp1Y2x4bmJzY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjI0MDMsImV4cCI6MjA4OTY5ODQwM30.CumnYJV3ikO4t79VsSt3Y0Y0qAvMb3RMXJHHUgayGjo';
     
-    let supabase;
+    let supabaseClinent;
     let qCount = 0; 
 
     window.onload = async function() {
         initDefaultQuestions(); // 화면 뼈대를 먼저 그립니다.
 
         try {
-            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            supabase = window.supabaseClient.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             await loadConfigFromSupabase(); 
         } catch (error) {
             document.getElementById('db-status').innerText = "❌ 첫 접속입니다. 우측 하단의 [저장]을 눌러주세요.";
@@ -236,7 +236,7 @@
     }
 
     async function loadConfigFromSupabase() {
-        const { data, error } = await supabase.from('form_config').select('config_data').eq('id', 1).single();
+        const { data, error } = await supabaseClient.from('form_config').select('config_data').eq('id', 1).single();
         
         if (error) throw error; // 에러가 나면 멈추고 catch로 넘어감
 
@@ -289,7 +289,7 @@
         });
 
         try {
-            const { error } = await supabase.from('form_config').upsert({ id: 1, config_data: configData });
+            const { error } = await supabaseClient.from('form_config').upsert({ id: 1, config_data: configData });
             if (error) throw error;
             
             alert('성공적으로 배포되었습니다!\n고객들이 메인 페이지 접속 시 지금 저장한 화면이 보여집니다.');
