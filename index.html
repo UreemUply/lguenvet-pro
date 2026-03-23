@@ -18,6 +18,7 @@
             --text-sub: #6b7280;
             --error-color: #ef4444;
             --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            --vvh: 100dvh;
         }
 
         * {
@@ -35,22 +36,9 @@
             -webkit-text-size-adjust: 100%;
         }
 
-        /* 모바일/카카오톡 한글 입력 안정화 */
-        input[type="text"],
-        input[type="password"],
-        textarea {
-            -webkit-user-select: auto !important;
-            user-select: auto !important;
-            -webkit-appearance: none;
-            appearance: none;
-            font-size: 16px;
-            line-height: 1.4;
-            transform: translateZ(0);
-        }
-
         body {
             background-color: var(--bg-gray);
-            min-height: 100dvh;
+            min-height: var(--vvh);
             overflow-y: auto;
             overflow-x: hidden;
             color: var(--text-main);
@@ -63,10 +51,30 @@
             max-width: 480px;
             margin: 0 auto;
             background-color: var(--card-bg);
-            min-height: 100dvh;
+            min-height: var(--vvh);
             position: relative;
             display: block;
             box-shadow: 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+            -webkit-appearance: none;
+            appearance: none;
+            font-size: 16px !important;
+            line-height: 1.45;
+            border-radius: 12px;
+            background-clip: padding-box;
+            caret-color: #111;
+        }
+
+        input.user-input,
+        .login-input,
+        textarea {
+            touch-action: manipulation;
         }
 
         .header {
@@ -139,7 +147,7 @@
             height: 100%;
             background-color: var(--primary);
             width: 0%;
-            transition: width 0.3s ease-out;
+            transition: width 0.2s ease-out;
         }
 
         .content-container {
@@ -151,21 +159,13 @@
         .page {
             display: none;
             flex-direction: column;
-            padding: 24px 24px 0 24px;
             width: 100%;
-            padding-bottom: 40px;
+            padding: 24px 24px 40px 24px;
             background: var(--card-bg);
         }
 
         .page.active {
             display: flex;
-            animation: simpleFadeIn 0.25s ease-out forwards;
-            transform: none !important;
-        }
-
-        @keyframes simpleFadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
         }
 
         .footer {
@@ -221,7 +221,7 @@
             align-items: center;
             font-size: 60px;
             flex-shrink: 0;
-            aspect-ratio: 16/10;
+            aspect-ratio: 16 / 10;
         }
 
         .cover-image-box img {
@@ -259,8 +259,8 @@
             border-radius: 12px;
             font-size: 16px;
             font-weight: 500;
-            transition: border-color 0.2s;
             background-color: #fafafa;
+            transition: border-color 0.12s ease;
         }
 
         input.user-input:focus,
@@ -342,40 +342,40 @@
         }
 
         .consent-box {
-            background:#f8fafc;
-            border:1px solid #e2e8f0;
-            padding:15px;
-            border-radius:12px;
-            font-size:13px;
-            color:#475569;
-            height:130px;
-            overflow-y:auto;
-            white-space:pre-wrap;
-            line-height:1.6;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #475569;
+            height: 130px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            line-height: 1.6;
         }
 
         .consent-check-label {
-            display:flex;
-            align-items:center;
-            gap:12px;
-            padding:15px;
-            background:white;
-            border:2px solid var(--border-color);
-            border-radius:12px;
-            cursor:pointer;
-            margin-top:10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 15px;
+            background: white;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 10px;
         }
 
         .consent-check-input {
-            width:22px;
-            height:22px;
-            accent-color:var(--primary);
+            width: 22px;
+            height: 22px;
+            accent-color: var(--primary);
         }
 
         .consent-check-text {
-            font-size:15px;
-            font-weight:700;
-            color:var(--text-main);
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--text-main);
         }
 
         .footer-flex {
@@ -443,10 +443,9 @@
         #store-modal {
             display: none;
             position: fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0,0,0,0.6);
             z-index: 2000;
             flex-direction: column;
@@ -462,12 +461,6 @@
             border-radius: 24px 24px 0 0;
             display: flex;
             flex-direction: column;
-            animation: slideUpModal 0.3s ease-out forwards;
-        }
-
-        @keyframes slideUpModal {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
         }
 
         .store-header {
@@ -546,10 +539,9 @@
         #planner-login {
             display: none;
             position: fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0,0,0,0.85);
             z-index: 999;
             justify-content: center;
@@ -573,21 +565,21 @@
             padding: 14px;
             margin-top: 16px;
             margin-bottom: 12px;
-            border: 1px solid var(--border-color);
+            border: 2px solid var(--border-color);
             border-radius: 8px;
             font-size: 16px;
             text-align: center;
             font-weight: 700;
             letter-spacing: 2px;
+            background: #fafafa;
         }
 
         #planner-view {
             display: none;
             position: fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
+            inset: 0;
+            width: 100%;
+            height: 100%;
             background: #f8fafc;
             z-index: 1000;
             flex-direction: column;
@@ -651,11 +643,10 @@
 
         #loading-screen {
             position: fixed;
-            top:0;
-            left:0;
-            width:100%;
-            height:100%;
-            background:white;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
             z-index: 9999;
             display: flex;
             justify-content: center;
@@ -725,7 +716,7 @@
         <div class="login-box">
             <h2 style="font-size: 20px; color: #111; margin-bottom: 5px;">플래너 전용 모드</h2>
             <p style="font-size: 13px; color: var(--text-sub);">고객 접수 내역을 확인하려면<br>암호를 입력해 주세요.</p>
-            <input type="password" id="planner-pw" class="login-input" placeholder="암호 입력" autocomplete="off" onkeypress="if(event.keyCode==13) checkPlannerPw()">
+            <input type="password" id="planner-pw" class="login-input" placeholder="암호 입력" autocomplete="off" inputmode="text" onkeypress="if(event.keyCode==13) checkPlannerPw()">
             <button class="btn-primary" style="width: 100%; padding: 14px; margin-top: 5px;" onclick="checkPlannerPw()">접속하기</button>
             <button style="background:none; border:none; color:#999; font-size:13px; margin-top:15px; cursor:pointer;" onclick="closePlannerLogin()">닫기</button>
         </div>
@@ -748,8 +739,53 @@
     let totalSteps = 0;
     let formConfig = null;
     let pagesData = [];
+    let imeLock = false;
+
+    function setViewportHeightVar() {
+        const vh = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        document.documentElement.style.setProperty('--vvh', `${vh}px`);
+    }
+
+    function stabilizeKoreanInputs() {
+        const textInputs = document.querySelectorAll('input[type="text"].user-input, input[type="password"], textarea');
+
+        textInputs.forEach((input) => {
+            if (input.dataset.bindDone === 'true') return;
+            input.dataset.bindDone = 'true';
+
+            input.setAttribute('autocomplete', 'off');
+            input.setAttribute('autocapitalize', 'off');
+            input.setAttribute('autocorrect', 'off');
+            input.setAttribute('spellcheck', 'false');
+            if (!input.getAttribute('inputmode')) input.setAttribute('inputmode', 'text');
+            if (!input.getAttribute('enterkeyhint')) input.setAttribute('enterkeyhint', 'done');
+
+            input.addEventListener('compositionstart', () => {
+                input.dataset.composing = 'true';
+                imeLock = true;
+            });
+
+            input.addEventListener('compositionend', () => {
+                input.dataset.composing = 'false';
+                imeLock = false;
+            });
+
+            input.addEventListener('blur', () => {
+                input.dataset.composing = 'false';
+                imeLock = false;
+            });
+        });
+    }
+
+    window.addEventListener('resize', setViewportHeightVar);
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', setViewportHeightVar);
+        window.visualViewport.addEventListener('scroll', setViewportHeightVar);
+    }
 
     window.onload = async function() {
+        setViewportHeightVar();
+
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             const { data, error } = await supabaseClient.from('form_config').select('config_data').eq('id', 1).single();
@@ -821,7 +857,19 @@
                 let inputHtml = '';
 
                 if (q.type === 'text') {
-                    inputHtml = `<input type="text" class="user-input val-check" name="${uniqueName}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="답변을 입력해 주세요.">`;
+                    inputHtml = `
+                        <input
+                            type="text"
+                            class="user-input val-check"
+                            name="${uniqueName}"
+                            inputmode="text"
+                            enterkeyhint="done"
+                            autocomplete="off"
+                            autocapitalize="off"
+                            autocorrect="off"
+                            spellcheck="false"
+                            placeholder="답변을 입력해 주세요."
+                        >`;
                 } else {
                     inputHtml += `<div class="box-btn-group">`;
                     q.options.forEach((opt) => {
@@ -898,6 +946,8 @@
         document.getElementById('progressText').innerText = '준비';
 
         renderStoreListModal();
+        stabilizeKoreanInputs();
+        setViewportHeightVar();
     }
 
     function renderStoreListModal() {
@@ -929,6 +979,8 @@
     }
 
     function goNext(currentStep) {
+        if (imeLock) return;
+
         const page = document.getElementById('page-' + currentStep);
         const errorMsg = page.querySelector('.error-msg');
         if (errorMsg) errorMsg.style.display = 'none';
@@ -959,7 +1011,7 @@
 
         if (!isValid && errorMsg) {
             errorMsg.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0, 0);
             return;
         }
 
@@ -967,6 +1019,8 @@
     }
 
     async function submitToSupabase(consentStep) {
+        if (imeLock) return;
+
         const page = document.getElementById('page-' + consentStep);
         const errorMsg = page.querySelector('.error-msg');
         if (errorMsg) errorMsg.style.display = 'none';
@@ -974,7 +1028,7 @@
         const requiredConsents = page.querySelectorAll('.consent-check-input.val-check-required');
         if (requiredConsents.length > 0 && !Array.from(requiredConsents).some(c => c.checked)) {
             errorMsg.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            window.scrollTo(0, 0);
             return;
         }
 
@@ -1005,6 +1059,7 @@
     }
 
     function goPrev(currentStep) {
+        if (imeLock) return;
         movePage(currentStep - 1);
     }
 
@@ -1014,7 +1069,7 @@
 
         if (targetPage) {
             targetPage.classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'auto' });
+            window.scrollTo(0, 0);
 
             const pBar = document.getElementById('progressBar');
             const pText = document.getElementById('progressText');
@@ -1038,6 +1093,9 @@
                 pText.innerText = `${targetStep} / ${totalQPages}`;
                 pText.style.color = 'var(--primary)';
             }
+
+            stabilizeKoreanInputs();
+            setViewportHeightVar();
         }
     }
 
@@ -1046,7 +1104,7 @@
         document.getElementById('planner-pw').value = '';
         setTimeout(() => {
             document.getElementById('planner-pw').focus();
-        }, 50);
+        }, 200);
     }
 
     function closePlannerLogin() {
@@ -1054,6 +1112,8 @@
     }
 
     function checkPlannerPw() {
+        if (imeLock) return;
+
         const pw = document.getElementById('planner-pw').value;
         if (pw === '2012') {
             document.getElementById('planner-login').style.display = 'none';
