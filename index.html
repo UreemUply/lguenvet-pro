@@ -2,135 +2,693 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>두드림 x U+ 임직원 특별 혜택</title>
     <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        :root { --primary: #E6007E; --primary-hover: #C6006D; --primary-light: #FCE6F2; --bg-gray: #f4f5f7; --card-bg: #ffffff; --border-color: #e5e7eb; --text-main: #1f2937; --text-sub: #6b7280; --error-color: #ef4444; --shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
-        * { box-sizing: border-box; font-family: 'Pretendard', sans-serif; -webkit-tap-highlight-color: transparent; outline: none; margin: 0; padding: 0;}
-        
-        /* 🚨 모바일 환경에서 텍스트 입력이 막히는 것 강제 방지 */
-        input[type="text"], textarea { -webkit-user-select: auto !important; user-select: auto !important; }
+        :root {
+            --primary: #E6007E;
+            --primary-hover: #C6006D;
+            --primary-light: #FCE6F2;
+            --bg-gray: #f4f5f7;
+            --card-bg: #ffffff;
+            --border-color: #e5e7eb;
+            --text-main: #1f2937;
+            --text-sub: #6b7280;
+            --error-color: #ef4444;
+            --shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
 
-        /* 모바일 100vh 스크롤 이슈 대응 */
+        * {
+            box-sizing: border-box;
+            font-family: 'Pretendard', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            height: 100%;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+
+        /* 모바일/카카오톡 한글 입력 안정화 */
+        input[type="text"],
+        input[type="password"],
+        textarea {
+            -webkit-user-select: auto !important;
+            user-select: auto !important;
+            -webkit-appearance: none;
+            appearance: none;
+            font-size: 16px;
+            line-height: 1.4;
+            transform: translateZ(0);
+        }
+
         body {
-    background-color: var(--bg-gray);
-    min-height: 100vh; /* 수정 */
-    overflow-y: auto;  /* 수정 */
-    color: var(--text-main);
-    display: flex;
-    justify-content: center;
-    -webkit-overflow-scrolling: touch; /* 추가 */
-}
-        #app { width: 100%;
-    max-width: 480px;
-    background-color: var(--card-bg);
-    min-height: 100vh; /* 수정 */
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    /* overflow: hidden 제거 */
-    box-shadow: 0 0 20px rgba(0,0,0,0.02);
-}
-        
-        .header { height: 70px; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; background-color: white; z-index: 100; border-bottom: 1px solid var(--border-color); flex-shrink: 0;}
-        .header-logo-container { display: flex; align-items: center; width: 60%; height: 100%; padding-right: 10px; overflow: hidden;}
-        .u-logo-img { max-height: 45px; max-width: 100%; object-fit: contain; object-position: left center; }
-        .header-right-text { width: 40%; color: #bbb; font-size: 13px; font-weight: 600; text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .progress-wrapper { padding: 12px 20px; background-color: white; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 15px; flex-shrink: 0;}
-        .progress-text { font-size: 14px; font-weight: 700; color: var(--primary); white-space: nowrap; width: 45px; text-align: right;}
-        .progress-container { flex-grow: 1; height: 6px; background-color: #e5e7eb; border-radius: 10px; overflow: hidden; }
-        .progress-bar { height: 100%; background-color: var(--primary); width: 0%; transition: width 0.3s ease-out; }
-        
-        .content-container {
-    flex-grow: 1;
-    position: relative;
-    overflow-y: auto; /* 수정 */
-    display: flex;
-    flex-direction: column;
-} 
-        
-        /* 🚨 한글 조합 버그 해결: position: absolute 제거 및 transform 애니메이션 삭제 */
-        .page { display: none; flex-direction: column; padding: 24px 24px 0 24px; width: 100%; padding-bottom: 100px; background: var(--card-bg); }
-        .page.active { display: flex; animation: simpleFadeIn 0.25s ease-out forwards; transform: none !important; }
-        @keyframes simpleFadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
-        .footer { padding: 16px 20px 24px 20px; background-color: white; border-top: 1px solid var(--border-color); position: sticky; bottom: 0; left: 0; width: 100%; z-index: 90; display: none; }
-        
-        .question-block { margin-bottom: 35px; padding-bottom: 20px; border-bottom: 1px dashed #e2e8f0; }
-        .question-block:last-child { border-bottom: none; margin-bottom: 0; }
-        
-        h1.user-h1 { font-size: 24px; font-weight: 700; color: #111; line-height: 1.4; margin: 0 0 6px 0; word-break: keep-all; }
-        .user-sub { font-size: 15px; color: var(--text-sub); line-height: 1.5; margin-bottom: 20px; word-break: keep-all; }
-        
-        .cover-image-box { width: 100%; max-height: 250px; background-color: #fafafa; border-radius: 20px; margin: 0 auto 16px auto; border: 1px solid var(--border-color); box-shadow: var(--shadow); overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 60px; flex-shrink: 0; aspect-ratio: 16/10;}
-        .cover-image-box img { width: 100%; height: 100%; object-fit: cover; }
-        .question-image-box { width: 100%; max-height: 180px; background-color: #fafafa; border-radius: 16px; margin-bottom: 20px; border: 1px solid var(--border-color); overflow: hidden; display: flex; justify-content: center; align-items: center; font-size: 50px; flex-shrink: 0; }
-        .question-image-box img { width: 100%; height: 100%; object-fit: cover; }
-        
-        input.user-input { width: 100%; padding: 18px; margin-bottom: 8px; border: 2px solid var(--border-color); border-radius: 12px; font-size: 16px; font-weight: 500; transition: border-color 0.2s; background-color: #fafafa;}
-        input.user-input:focus { border: 2px solid var(--primary); background-color: white;}
-        .error-msg { color: var(--error-color); font-size: 13px; font-weight: 600; margin-bottom: 16px; display: none; text-align: center; background: #fee2e2; padding: 10px; border-radius: 8px; }
-        .box-btn-group { display: flex; flex-direction: column; gap: 12px; width: 100%; }
-        .box-btn-label { display: block; position: relative; cursor: pointer; }
-        .box-btn-label input { position: absolute; opacity: 0; width: 0; height: 0; }
-        .box-btn-content { display: flex; align-items: center; justify-content: center; width: 100%; padding: 18px; border: 2px solid var(--border-color); border-radius: 12px; background-color: var(--card-bg); font-weight: 600; font-size: 16px; color: var(--text-main); transition: all 0.2s; text-align: center; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
-        .box-btn-label:hover .box-btn-content { border-color: #f7bbdc; background-color: #fff9fc; }
-        .box-btn-label input:checked ~ .box-btn-content { border-color: var(--primary); background-color: var(--primary-light); color: var(--primary); box-shadow: 0 4px 10px rgba(230, 0, 126, 0.1); }
-        
-        .consent-sector { margin-bottom: 25px; }
-        .consent-title { font-size: 16px; font-weight: 700; margin-bottom: 10px; color: var(--text-main); }
-        .consent-box { background:#f8fafc; border:1px solid #e2e8f0; padding:15px; border-radius:12px; font-size:13px; color:#475569; height:130px; overflow-y:auto; white-space:pre-wrap; line-height:1.6; }
-        .consent-check-label { display:flex; align-items:center; gap:12px; padding:15px; background:white; border:2px solid var(--border-color); border-radius:12px; cursor:pointer; margin-top:10px;}
-        .consent-check-input { width:22px; height:22px; accent-color:var(--primary); }
-        .consent-check-text { font-size:15px; font-weight:700; color:var(--text-main); }
-        
-        .footer-flex { display: flex; gap: 10px; width: 100%; }
-        .btn-primary { flex: 1; padding: 16px; background-color: var(--primary); color: white; border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 10px rgba(230, 0, 126, 0.15); }
-        .btn-secondary { width: 30%; padding: 16px; background-color: #f3f4f6; color: var(--text-main); border: none; border-radius: 12px; font-size: 17px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
-        .btn-dark { background-color: #1f2937; color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        
-        .center-text { text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;}
-        .planner-link-btn { background: none; border: none; font-size: 13px; color: #9ca3af; display: inline-flex; align-items: center; gap: 4px; cursor: pointer; margin-top: 16px; width: 100%; justify-content: center;}
-        
-        /* 다이렉트 매장 모달 */
-        #store-modal { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 2000; flex-direction: column; justify-content: flex-end;}
-        .store-modal-content { background: #f8fafc; width: 100%; height: 85%; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; animation: slideUpModal 0.3s ease-out forwards; }
-        @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        .store-header { padding: 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); background: white; border-radius: 24px 24px 0 0; }
-        .store-header h2 { font-size: 18px; font-weight: 800; color: #111; }
-        .close-store-btn { background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; font-weight: bold; color: #64748b; cursor: pointer; }
-        .store-list-container { padding: 20px; overflow-y: auto; flex-grow: 1; }
-        .store-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.03); }
-        .store-card h3 { font-size: 18px; font-weight: 700; color: var(--primary); margin-bottom: 6px; }
-        .store-card p { font-size: 14px; color: var(--text-sub); margin-bottom: 16px; line-height: 1.4; word-break: keep-all; }
-        .store-call-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 14px; background: #111827; color: white; border-radius: 10px; text-decoration: none; font-weight: 700; font-size: 15px; gap: 8px; }
-        
-        #planner-login { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.85); z-index: 999; justify-content: center; align-items: center; flex-direction: column; padding: 20px; }
-        .login-box { background: white; width: 100%; max-width: 320px; padding: 30px 20px; border-radius: 16px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
-        .login-input { width: 100%; padding: 14px; margin-top: 16px; margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; text-align: center; font-weight: 700; letter-spacing: 2px;}
-        .login-input:focus { border-color: var(--primary); }
-        #planner-view { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: #f8fafc; z-index: 1000; flex-direction: column; }
-        .planner-header { height: 60px; background: var(--primary); color: white; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-weight: 700; font-size: 16px; flex-shrink: 0;}
-        .planner-content { flex-grow: 1; padding: 20px; overflow-y: auto; }
-        .db-card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid var(--border-color); }
-        .db-card-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; color: var(--text-sub); border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;}
-        .db-card-content { font-size: 15px; color: var(--text-main); font-weight: 600; line-height: 1.5; margin-bottom: 10px;}
-        .db-remark { font-size: 13px; color: var(--primary); background: var(--primary-light); padding: 8px 12px; border-radius: 6px; }
-        
-        #loading-screen { position: absolute; top:0; left:0; width:100%; height:100%; background:white; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; color: var(--text-sub); font-size: 14px; text-align: center;}
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px;}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+            background-color: var(--bg-gray);
+            min-height: 100dvh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            color: var(--text-main);
+            display: block;
+            -webkit-overflow-scrolling: touch;
+        }
 
-        input, textarea {
-    font-size: 16px;
-    -webkit-appearance: none;
-}
+        #app {
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background-color: var(--card-bg);
+            min-height: 100dvh;
+            position: relative;
+            display: block;
+            box-shadow: 0 0 20px rgba(0,0,0,0.02);
+        }
+
+        .header {
+            height: 70px;
+            padding: 0 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+
+        .header-logo-container {
+            display: flex;
+            align-items: center;
+            width: 60%;
+            height: 100%;
+            padding-right: 10px;
+            overflow: hidden;
+        }
+
+        .u-logo-img {
+            max-height: 45px;
+            max-width: 100%;
+            object-fit: contain;
+            object-position: left center;
+        }
+
+        .header-right-text {
+            width: 40%;
+            color: #bbb;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: right;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-wrapper {
+            padding: 12px 20px;
+            background-color: white;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-shrink: 0;
+        }
+
+        .progress-text {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+            width: 45px;
+            text-align: right;
+        }
+
+        .progress-container {
+            flex-grow: 1;
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            width: 0%;
+            transition: width 0.3s ease-out;
+        }
+
+        .content-container {
+            position: relative;
+            overflow: visible;
+            display: block;
+        }
+
+        .page {
+            display: none;
+            flex-direction: column;
+            padding: 24px 24px 0 24px;
+            width: 100%;
+            padding-bottom: 40px;
+            background: var(--card-bg);
+        }
+
+        .page.active {
+            display: flex;
+            animation: simpleFadeIn 0.25s ease-out forwards;
+            transform: none !important;
+        }
+
+        @keyframes simpleFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .footer {
+            padding: 16px 20px 24px 20px;
+            background-color: white;
+            border-top: 1px solid var(--border-color);
+            position: static;
+            width: 100%;
+            z-index: auto;
+            display: none;
+            margin-top: 24px;
+        }
+
+        .question-block {
+            margin-bottom: 35px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+
+        .question-block:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        h1.user-h1 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #111;
+            line-height: 1.4;
+            margin: 0 0 6px 0;
+            word-break: keep-all;
+        }
+
+        .user-sub {
+            font-size: 15px;
+            color: var(--text-sub);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            word-break: keep-all;
+        }
+
+        .cover-image-box {
+            width: 100%;
+            max-height: 250px;
+            background-color: #fafafa;
+            border-radius: 20px;
+            margin: 0 auto 16px auto;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 60px;
+            flex-shrink: 0;
+            aspect-ratio: 16/10;
+        }
+
+        .cover-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .question-image-box {
+            width: 100%;
+            max-height: 180px;
+            background-color: #fafafa;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 50px;
+            flex-shrink: 0;
+        }
+
+        .question-image-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        input.user-input {
+            width: 100%;
+            padding: 18px;
+            margin-bottom: 8px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 500;
+            transition: border-color 0.2s;
+            background-color: #fafafa;
+        }
+
+        input.user-input:focus,
+        .login-input:focus {
+            border: 2px solid var(--primary);
+            background-color: white;
+        }
+
+        .error-msg {
+            color: var(--error-color);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: none;
+            text-align: center;
+            background: #fee2e2;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .box-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .box-btn-label {
+            display: block;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .box-btn-label input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .box-btn-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 18px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            background-color: var(--card-bg);
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-main);
+            transition: all 0.2s;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+
+        .box-btn-label:hover .box-btn-content {
+            border-color: #f7bbdc;
+            background-color: #fff9fc;
+        }
+
+        .box-btn-label input:checked ~ .box-btn-content {
+            border-color: var(--primary);
+            background-color: var(--primary-light);
+            color: var(--primary);
+            box-shadow: 0 4px 10px rgba(230, 0, 126, 0.1);
+        }
+
+        .consent-sector {
+            margin-bottom: 25px;
+        }
+
+        .consent-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+
+        .consent-box {
+            background:#f8fafc;
+            border:1px solid #e2e8f0;
+            padding:15px;
+            border-radius:12px;
+            font-size:13px;
+            color:#475569;
+            height:130px;
+            overflow-y:auto;
+            white-space:pre-wrap;
+            line-height:1.6;
+        }
+
+        .consent-check-label {
+            display:flex;
+            align-items:center;
+            gap:12px;
+            padding:15px;
+            background:white;
+            border:2px solid var(--border-color);
+            border-radius:12px;
+            cursor:pointer;
+            margin-top:10px;
+        }
+
+        .consent-check-input {
+            width:22px;
+            height:22px;
+            accent-color:var(--primary);
+        }
+
+        .consent-check-text {
+            font-size:15px;
+            font-weight:700;
+            color:var(--text-main);
+        }
+
+        .footer-flex {
+            display: flex;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .btn-primary {
+            flex: 1;
+            padding: 16px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 10px rgba(230, 0, 126, 0.15);
+        }
+
+        .btn-secondary {
+            width: 30%;
+            padding: 16px;
+            background-color: #f3f4f6;
+            color: var(--text-main);
+            border: none;
+            border-radius: 12px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-dark {
+            background-color: #1f2937;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        }
+
+        .center-text {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .planner-link-btn {
+            background: none;
+            border: none;
+            font-size: 13px;
+            color: #9ca3af;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            margin-top: 16px;
+            width: 100%;
+            justify-content: center;
+        }
+
+        #store-modal {
+            display: none;
+            position: fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .store-modal-content {
+            background: #f8fafc;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            height: 85%;
+            border-radius: 24px 24px 0 0;
+            display: flex;
+            flex-direction: column;
+            animation: slideUpModal 0.3s ease-out forwards;
+        }
+
+        @keyframes slideUpModal {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .store-header {
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            background: white;
+            border-radius: 24px 24px 0 0;
+        }
+
+        .store-header h2 {
+            font-size: 18px;
+            font-weight: 800;
+            color: #111;
+        }
+
+        .close-store-btn {
+            background: #f1f5f9;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        .store-list-container {
+            padding: 20px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .store-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .store-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .store-card p {
+            font-size: 14px;
+            color: var(--text-sub);
+            margin-bottom: 16px;
+            line-height: 1.4;
+            word-break: keep-all;
+        }
+
+        .store-call-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            padding: 14px;
+            background: #111827;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 15px;
+            gap: 8px;
+        }
+
+        #planner-login {
+            display: none;
+            position: fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            width: 100%;
+            max-width: 320px;
+            padding: 30px 20px;
+            border-radius: 16px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 14px;
+            margin-top: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        #planner-view {
+            display: none;
+            position: fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background: #f8fafc;
+            z-index: 1000;
+            flex-direction: column;
+        }
+
+        .planner-header {
+            height: 60px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            font-weight: 700;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .planner-content {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .db-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .db-card-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-sub);
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+
+        .db-card-content {
+            font-size: 15px;
+            color: var(--text-main);
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .db-remark {
+            font-size: 13px;
+            color: var(--primary);
+            background: var(--primary-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+        }
+
+        #loading-screen {
+            position: fixed;
+            top:0;
+            left:0;
+            width:100%;
+            height:100%;
+            background:white;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            color: var(--text-sub);
+            font-size: 14px;
+            text-align: center;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @supports not (height: 100dvh) {
+            body, #app {
+                min-height: 100vh;
+            }
+        }
     </style>
 </head>
-<body> 
+<body>
 
 <div id="app">
     <div id="loading-screen">
@@ -145,7 +703,7 @@
         </div>
         <div class="header-right-text" id="u-logo-sub-txt">임직원 특별 혜택</div>
     </div>
-    
+
     <div class="progress-wrapper">
         <div class="progress-container"><div class="progress-bar" id="progressBar" style="width:0%;"></div></div>
         <div class="progress-text" id="progressText">대기</div>
@@ -167,7 +725,7 @@
         <div class="login-box">
             <h2 style="font-size: 20px; color: #111; margin-bottom: 5px;">플래너 전용 모드</h2>
             <p style="font-size: 13px; color: var(--text-sub);">고객 접수 내역을 확인하려면<br>암호를 입력해 주세요.</p>
-            <input type="password" id="planner-pw" class="login-input" placeholder="암호 입력" onkeypress="if(event.keyCode==13) checkPlannerPw()">
+            <input type="password" id="planner-pw" class="login-input" placeholder="암호 입력" autocomplete="off" onkeypress="if(event.keyCode==13) checkPlannerPw()">
             <button class="btn-primary" style="width: 100%; padding: 14px; margin-top: 5px;" onclick="checkPlannerPw()">접속하기</button>
             <button style="background:none; border:none; color:#999; font-size:13px; margin-top:15px; cursor:pointer;" onclick="closePlannerLogin()">닫기</button>
         </div>
@@ -183,26 +741,24 @@
 </div>
 
 <script>
-    // 🚨 한글 입력(IME) 조합을 끊어버리는 'focusin 스크롤 자동이동(scrollIntoView)' 자바스크립트를 완전히 삭제했습니다.
-
     const SUPABASE_URL = 'https://qcrafqzgfzuclxnbscod.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjcmFmcXpnZnp1Y2x4bmJzY29kIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQxMjI0MDMsImV4cCI6MjA4OTY5ODQwM30.CumnYJV3ikO4t79VsSt3Y0Y0qAvMb3RMXJHHUgayGjo';
-    
+
     let supabaseClient;
-    let totalSteps = 0; 
+    let totalSteps = 0;
     let formConfig = null;
-    let pagesData = []; 
+    let pagesData = [];
 
     window.onload = async function() {
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             const { data, error } = await supabaseClient.from('form_config').select('config_data').eq('id', 1).single();
-            
+
             if (error) {
                 showError("관리자 페이지에서 먼저<br>[전체 저장하여 배포하기] 버튼을 눌러주세요.");
                 return;
             }
-            
+
             if (data && data.config_data && Object.keys(data.config_data).length > 0) {
                 formConfig = data.config_data;
                 renderFormFromConfig();
@@ -220,7 +776,7 @@
     }
 
     function renderFormFromConfig() {
-        document.getElementById('loading-screen').style.display = 'none'; 
+        document.getElementById('loading-screen').style.display = 'none';
 
         if (formConfig.global.logo && formConfig.global.logo.length > 10) {
             document.getElementById('u-logo-img').src = formConfig.global.logo;
@@ -232,14 +788,13 @@
         if (formConfig.pages && formConfig.pages.length > 0) {
             pagesData = formConfig.pages;
         } else if (formConfig.questions && formConfig.questions.length > 0) {
-            pagesData = formConfig.questions.map(q => [q]); 
+            pagesData = formConfig.questions.map(q => [q]);
         }
 
         const container = document.getElementById('dynamic-form-container');
-        let htmlString = ''; 
+        let htmlString = '';
         let stepIndex = 0;
 
-        // 1. 커버 페이지 렌더링
         const coverImgTag = formConfig.cover.img ? `<img src="${formConfig.cover.img}">` : `<div style="padding:40px;">🎁</div>`;
         htmlString += `
             <div class="page active" id="page-0">
@@ -255,23 +810,22 @@
             </div>`;
         stepIndex++;
 
-        // 2. 질문 페이지 렌더링
         pagesData.forEach((pageQuestions, pIdx) => {
             htmlString += `<div class="page" id="page-${stepIndex}">
                 <div class="error-msg" id="err-${stepIndex}">작성하지 않은 항목이 있습니다. 빠짐없이 체크해 주세요.</div>`;
-            
+
             pageQuestions.forEach((q, qIdx) => {
-                const uniqueName = `q_${pIdx}_${qIdx}`; 
+                const uniqueName = `q_${pIdx}_${qIdx}`;
                 const imgHtml = q.img ? `<div class="question-image-box"><img src="${q.img}"></div>` : ``;
                 const subHtml = q.sub && q.sub !== '<br>' ? `<div class="user-sub">${q.sub}</div>` : '';
                 let inputHtml = '';
-                
-                if (q.type === 'text') { 
-                    inputHtml = `<input type="text" class="user-input val-check" name="${uniqueName}" placeholder="답변을 입력해 주세요.">`; 
+
+                if (q.type === 'text') {
+                    inputHtml = `<input type="text" class="user-input val-check" name="${uniqueName}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="답변을 입력해 주세요.">`;
                 } else {
                     inputHtml += `<div class="box-btn-group">`;
-                    q.options.forEach((opt) => { 
-                        inputHtml += `<label class="box-btn-label"><input type="${q.type}" name="${uniqueName}" class="val-check" value="${opt}"><div class="box-btn-content">${opt}</div></label>`; 
+                    q.options.forEach((opt) => {
+                        inputHtml += `<label class="box-btn-label"><input type="${q.type}" name="${uniqueName}" class="val-check" value="${opt}"><div class="box-btn-content">${opt}</div></label>`;
                     });
                     inputHtml += `</div>`;
                 }
@@ -297,7 +851,6 @@
             stepIndex++;
         });
 
-        // 3. 약관 동의 페이지 렌더링
         const c = formConfig.consent;
         htmlString += `
             <div class="page" id="page-${stepIndex}">
@@ -313,7 +866,7 @@
                     <label class="consent-check-label"><input type="checkbox" class="consent-check-input val-check-marketing"><span class="consent-check-text">[선택] ${c.mLabel}</span></label>
                 </div>
                 <div class="error-msg" id="err-${stepIndex}" style="margin-bottom: 20px;">필수 약관에 동의하셔야 제출이 가능합니다.</div>
-                
+
                 <div class="footer" style="display:block;">
                     <div class="footer-flex">
                         <button class="btn-secondary" onclick="goPrev(${stepIndex})">이전</button>
@@ -323,9 +876,8 @@
             </div>`;
         stepIndex++;
 
-        // 4. 완료 페이지 렌더링
         let directBtnHtml = '';
-        if(formConfig.finish.showDirectBtn !== false) { 
+        if (formConfig.finish.showDirectBtn !== false) {
             directBtnHtml = `<button class="btn-primary btn-dark" style="width: 100%; margin-top: 12px;" onclick="openStoreModal()">📞 다이렉트 문의 (매장 연결)</button>`;
         }
 
@@ -340,21 +892,21 @@
                     </div>
                 </div>
             </div>`;
-        
+
         container.innerHTML = htmlString;
-        totalSteps = stepIndex + 1; 
+        totalSteps = stepIndex + 1;
         document.getElementById('progressText').innerText = '준비';
-        
+
         renderStoreListModal();
     }
 
     function renderStoreListModal() {
         const storeContainer = document.getElementById('store-list-render-area');
-        if(!formConfig.stores || formConfig.stores.length === 0) {
+        if (!formConfig.stores || formConfig.stores.length === 0) {
             storeContainer.innerHTML = `<div style="text-align:center; padding: 40px 0; color:#94a3b8; font-size:15px;">등록된 매장 정보가 없습니다.</div>`;
             return;
         }
-        
+
         let storeHtml = '';
         formConfig.stores.forEach(store => {
             storeHtml += `
@@ -368,67 +920,78 @@
         storeContainer.innerHTML = storeHtml;
     }
 
-    function openStoreModal() { document.getElementById('store-modal').style.display = 'flex'; }
-    function closeStoreModal() { document.getElementById('store-modal').style.display = 'none'; }
+    function openStoreModal() {
+        document.getElementById('store-modal').style.display = 'flex';
+    }
+
+    function closeStoreModal() {
+        document.getElementById('store-modal').style.display = 'none';
+    }
 
     function goNext(currentStep) {
         const page = document.getElementById('page-' + currentStep);
         const errorMsg = page.querySelector('.error-msg');
-        if(errorMsg) errorMsg.style.display = 'none';
+        if (errorMsg) errorMsg.style.display = 'none';
 
         let isValid = true;
-        
+
         const textInputs = page.querySelectorAll('input[type="text"].val-check');
-        textInputs.forEach(t => { 
-            if (t.value.trim() === '') { t.style.borderColor = 'var(--error-color)'; isValid = false; } 
-            else { t.style.borderColor = 'var(--border-color)'; }
+        textInputs.forEach(t => {
+            if (t.value.trim() === '') {
+                t.style.borderColor = 'var(--error-color)';
+                isValid = false;
+            } else {
+                t.style.borderColor = 'var(--border-color)';
+            }
         });
 
         const radioGroups = [...new Set([...page.querySelectorAll('input[type="radio"].val-check')].map(r => r.name))];
         radioGroups.forEach(name => {
             const isChecked = page.querySelector(`input[type="radio"][name="${name}"]:checked`);
-            if(!isChecked) isValid = false;
+            if (!isChecked) isValid = false;
         });
 
         const checkGroups = [...new Set([...page.querySelectorAll('input[type="checkbox"].val-check')].map(c => c.name))];
         checkGroups.forEach(name => {
             const isChecked = page.querySelector(`input[type="checkbox"][name="${name}"]:checked`);
-            if(!isChecked) isValid = false;
+            if (!isChecked) isValid = false;
         });
 
-        if(!isValid && errorMsg) { 
-            errorMsg.style.display = 'block'; 
-            page.scrollTop = 0;
-            return; 
+        if (!isValid && errorMsg) {
+            errorMsg.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
         }
+
         movePage(currentStep + 1);
     }
 
     async function submitToSupabase(consentStep) {
         const page = document.getElementById('page-' + consentStep);
         const errorMsg = page.querySelector('.error-msg');
-        if(errorMsg) errorMsg.style.display = 'none';
+        if (errorMsg) errorMsg.style.display = 'none';
 
         const requiredConsents = page.querySelectorAll('.consent-check-input.val-check-required');
         if (requiredConsents.length > 0 && !Array.from(requiredConsents).some(c => c.checked)) {
-            errorMsg.style.display = 'block'; 
-            page.scrollTop = 0;
+            errorMsg.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
             return;
         }
 
         let collectedAnswers = [];
         document.querySelectorAll('.val-check').forEach(input => {
-            if(input.type === 'text') {
+            if (input.type === 'text') {
                 collectedAnswers.push(input.value);
             } else if (input.type === 'radio' && input.checked) {
                 collectedAnswers.push(input.value);
             } else if (input.type === 'checkbox' && input.checked) {
-                collectedAnswers.push(`[다중] ${input.value}`); 
+                collectedAnswers.push(`[다중] ${input.value}`);
             }
         });
 
         const submitBtn = document.getElementById('submit-btn');
-        submitBtn.innerText = "제출 중..."; submitBtn.disabled = true;
+        submitBtn.innerText = "제출 중...";
+        submitBtn.disabled = true;
 
         try {
             const { error } = await supabaseClient.from('submissions').insert([{ content: collectedAnswers.join(' / ') }]);
@@ -436,86 +999,115 @@
             movePage(consentStep + 1);
         } catch (error) {
             alert('데이터 저장 중 문제가 발생했습니다. 잠시 후 다시 시도해 주세요.');
-            submitBtn.innerText = "제출하기"; submitBtn.disabled = false;
+            submitBtn.innerText = "제출하기";
+            submitBtn.disabled = false;
         }
     }
 
-    function goPrev(currentStep) { movePage(currentStep - 1); }
+    function goPrev(currentStep) {
+        movePage(currentStep - 1);
+    }
 
     function movePage(targetStep) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         const targetPage = document.getElementById('page-' + targetStep);
-        if(targetPage) {
-            targetPage.classList.add('active');
-            targetPage.scrollTop = 0; 
 
-            const pBar = document.getElementById('progressBar'); 
+        if (targetPage) {
+            targetPage.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'auto' });
+
+            const pBar = document.getElementById('progressBar');
             const pText = document.getElementById('progressText');
-            
-            if(targetStep === 0) { 
-                pBar.style.width = '0%'; pText.innerText = '준비'; pText.style.color = 'var(--text-sub)'; 
-            } 
-            else if (targetStep === totalSteps - 1) { 
-                pBar.style.width = '100%'; pText.innerText = '완료!'; pText.style.color = 'var(--primary)'; 
-            } 
-            else if (targetStep === totalSteps - 2) { 
-                pBar.style.width = '100%'; pText.innerText = '약관동의'; pText.style.color = 'var(--primary)'; 
-            } 
-            else {
+
+            if (targetStep === 0) {
+                pBar.style.width = '0%';
+                pText.innerText = '준비';
+                pText.style.color = 'var(--text-sub)';
+            } else if (targetStep === totalSteps - 1) {
+                pBar.style.width = '100%';
+                pText.innerText = '완료!';
+                pText.style.color = 'var(--primary)';
+            } else if (targetStep === totalSteps - 2) {
+                pBar.style.width = '100%';
+                pText.innerText = '약관동의';
+                pText.style.color = 'var(--primary)';
+            } else {
                 const totalQPages = pagesData.length;
                 const progressPercentage = (targetStep / totalQPages) * 100;
-                pBar.style.width = progressPercentage + '%'; 
-                pText.innerText = `${targetStep} / ${totalQPages}`; 
+                pBar.style.width = progressPercentage + '%';
+                pText.innerText = `${targetStep} / ${totalQPages}`;
                 pText.style.color = 'var(--primary)';
             }
         }
     }
 
-    function openPlannerLogin() { document.getElementById('planner-login').style.display = 'flex'; document.getElementById('planner-pw').value = ''; document.getElementById('planner-pw').focus(); }
-    function closePlannerLogin() { document.getElementById('planner-login').style.display = 'none'; }
-    
+    function openPlannerLogin() {
+        document.getElementById('planner-login').style.display = 'flex';
+        document.getElementById('planner-pw').value = '';
+        setTimeout(() => {
+            document.getElementById('planner-pw').focus();
+        }, 50);
+    }
+
+    function closePlannerLogin() {
+        document.getElementById('planner-login').style.display = 'none';
+    }
+
     function checkPlannerPw() {
         const pw = document.getElementById('planner-pw').value;
-        if(pw === '2012') { 
+        if (pw === '2012') {
             document.getElementById('planner-login').style.display = 'none';
             document.getElementById('planner-view').style.display = 'flex';
-            fetchPlannerDB(); 
+            fetchPlannerDB();
         } else {
-            alert('암호가 올바르지 않습니다.'); document.getElementById('planner-pw').value = '';
+            alert('암호가 올바르지 않습니다.');
+            document.getElementById('planner-pw').value = '';
         }
     }
-    function closePlannerView() { document.getElementById('planner-view').style.display = 'none'; }
+
+    function closePlannerView() {
+        document.getElementById('planner-view').style.display = 'none';
+    }
 
     async function fetchPlannerDB() {
         const container = document.getElementById('planner-db-list');
         container.innerHTML = '<div style="text-align:center; padding:50px 0; color:#999; font-size:14px;">데이터를 실시간으로 불러오는 중...</div>';
+
         try {
             const { data, error } = await supabaseClient.from('submissions').select('*').order('id', { ascending: false });
             if (error) throw error;
 
             container.innerHTML = '';
-            if(!data || data.length === 0) {
+            if (!data || data.length === 0) {
                 container.innerHTML = '<div style="text-align:center; padding:50px 0; color:#999; font-size:14px;">아직 접수된 내역이 없습니다.</div>';
                 return;
             }
+
             data.forEach(item => {
                 const d = new Date(item.created_at);
-                const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+                const dateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
                 const remarkHtml = item.remark ? `<div class="db-remark">💡 비고: ${item.remark}</div>` : '';
                 const card = document.createElement('div');
                 card.className = 'db-card';
-                card.innerHTML = `<div class="db-card-header"><span style="font-weight:700; color:var(--primary);">No. ${item.id}</span><span>${dateStr}</span></div><div class="db-card-content">${item.content}</div>${remarkHtml}`;
+                card.innerHTML = `
+                    <div class="db-card-header">
+                        <span style="font-weight:700; color:var(--primary);">No. ${item.id}</span>
+                        <span>${dateStr}</span>
+                    </div>
+                    <div class="db-card-content">${item.content}</div>
+                    ${remarkHtml}
+                `;
                 container.appendChild(card);
             });
         } catch (error) {
             container.innerHTML = '<div style="text-align:center; padding:50px 0; color:var(--error-color); font-size:14px;">데이터를 불러오는 데 실패했습니다.</div>';
         }
     }
-const isKakao = /KAKAOTALK/i.test(navigator.userAgent);
 
-if (isKakao) {
-    document.body.style.overflow = 'auto';
-}    
+    const isKakao = /KAKAOTALK/i.test(navigator.userAgent);
+    if (isKakao) {
+        document.body.style.overflow = 'auto';
+    }
 </script>
 </body>
 </html>
